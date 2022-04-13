@@ -177,7 +177,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         \MigrationsGenerator\MigrationsGeneratorServiceProvider::class,
-
+        App\Providers\FileSystemProvider::class,
     ],
 
     /*

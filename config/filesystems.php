@@ -32,10 +32,36 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app'),
+            'root' => '/',//storage_path('app'),
             'throw' => false,
+            'cache' => [
+                'store' => 'memcached',
+                'expire' => 600,
+                'prefix' => 'cache-prefix',
+            ],
         ],
-
+        'sftp' => [
+            'driver' => 'sftp',
+            'host' => 'example.com',
+            'username' => 'your-username',
+            'password' => 'your-password',
+ 
+            // Settings for SSH key based authentication...
+            // 'privateKey' => '/path/to/privateKey',
+            // 'password' => 'encryption-password',
+ 
+            // Optional SFTP Settings...
+            // 'port' => 22,
+            // 'root' => '',
+            // 'timeout' => 30,
+            'cache' => [
+                'store' => 'memcached',
+                'expire' => 600,
+                'prefix' => 'cache-prefix',
+            ],
+  
+        ],
+        /*
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -55,6 +81,7 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
+        */
 
     ],
 

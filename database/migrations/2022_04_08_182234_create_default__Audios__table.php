@@ -16,6 +16,7 @@ class CreateDefaultAudiosTable extends Migration
         Schema::create('default.Audios', function (Blueprint $table) {
             $table->increments('idAudio')->first();
             $table->text('Url')->nullable();
+            $table->text('Server')->nullable();
             $table->text('ShortUrl')->nullable();
             $table->timestampTz('FechaCreacion')->nullable();
             $table->integer('Tamano')->nullable();

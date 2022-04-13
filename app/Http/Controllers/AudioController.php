@@ -5,9 +5,16 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAudioRequest;
 use App\Http\Requests\UpdateAudioRequest;
 use App\Models\Audio;
+use App\Services\FileSystem;
+use Illuminate\Support\Facades\Response;
 
 class AudioController extends Controller
 {
+    protected $fileSystemService;
+    public function __construct(FileSystem $fileSystemService)
+    {
+        $this->fileSystemService = $fileSystemService;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -43,8 +50,16 @@ class AudioController extends Controller
     public function getUrl(string $shortUrl)
     {
         $audio = Audio::where('ShortUrl',$shortUrl)->firstOrFail();
-        return $audio->Url;
+        $file = $this->fileSystemService->getFile($audio);
+        $response = Response::make($file,200);
+        $mime_type = "audio/mpeg";
+       
+        //$response->header('Accept-Ranges',' 0-' .$audio->Tamano );
+        //$response->header('Content-Length',$audio->Tamano );
+        $response->header('Content-Type', $mime_type );
+        $response->header('Content-Disposition','inline');
         
+        return $response; 
     }
     /**
      * Show the form for editing the specified resource.
