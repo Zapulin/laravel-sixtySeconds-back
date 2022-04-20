@@ -47,7 +47,7 @@ class AudioController extends Controller
     }
 
     
-    public function getUrl(string $shortUrl)
+    public function getAudio(string $shortUrl)
     {
         $audio = Audio::where('ShortUrl',$shortUrl)->firstOrFail();
         $file = $this->fileSystemService->getFile($audio);
