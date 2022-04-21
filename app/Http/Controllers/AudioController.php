@@ -11,10 +11,12 @@ use Illuminate\Support\Facades\Response;
 class AudioController extends Controller
 {
     protected $fileSystemService;
+
     public function __construct(FileSystem $fileSystemService)
     {
         $this->fileSystemService = $fileSystemService;
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -46,21 +48,27 @@ class AudioController extends Controller
         //
     }
 
-    
+    /**
+     * Tries to retrieve and return this specified resource from provided url.
+     *
+     * @param string $shortUrl
+     * @return \Illuminate\Http\Response
+     */
     public function getAudio(string $shortUrl)
     {
-        $audio = Audio::where('ShortUrl',$shortUrl)->firstOrFail();
+        $audio = Audio::where('ShortUrl', $shortUrl)->firstOrFail();
         $file = $this->fileSystemService->getFile($audio);
-        $response = Response::make($file,200);
+        $response = Response::make($file, 200);
         $mime_type = "audio/mpeg";
-       
-        //$response->header('Accept-Ranges',' 0-' .$audio->Tamano );
-        //$response->header('Content-Length',$audio->Tamano );
-        $response->header('Content-Type', $mime_type );
-        $response->header('Content-Disposition','inline');
-        
-        return $response; 
+
+        //$response->header('Accept-Ranges', '0-', $audio->Tamano);
+        //$response->header('Content-Length', $audio->Tamano);
+        $response->header('Content-Type', $mime_type);
+        $response->header('Content-Disposition', 'inline');
+
+        return $response;
     }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -69,7 +77,7 @@ class AudioController extends Controller
      */
     public function edit(Audio $audio)
     {
-        
+        //
     }
 
     /**
