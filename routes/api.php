@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+             
 Route::get('/audio/{shortUrl}', 'App\Http\Controllers\AudioController@getAudio');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -20,3 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/posts', 'App\Http\Controllers\PostController@Index');
+Route::get('/post/{id}','App\Http\Controllers\PostController@show');
+Route::post('/post/create','App\Http\Controllers\PostController@store');
+Route::post('/post/update','App\Http\Controllers\PostController@update');
+Route::delete('/post/{id}','App\Http\Controllers\PostController@destroy');
+

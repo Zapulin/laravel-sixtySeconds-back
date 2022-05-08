@@ -16,6 +16,7 @@ class CreateDefaultPostTable extends Migration
         Schema::create('default.Post', function (Blueprint $table) {
             $table->increments('idPost')->first();
             $table->integer('idVisibilidad')->nullable()->index('fki_idVisibilidad_VisibilidadPost');
+            $table->string('Titulo',80)->nullable();
             $table->bigInteger('Visualizaciones')->nullable();
             $table->integer('idUsuario')->nullable()->index('fki_idusuario_usuarios');
             $table->integer('idAudio')->nullable()->index('fki_idAudio_Audios');

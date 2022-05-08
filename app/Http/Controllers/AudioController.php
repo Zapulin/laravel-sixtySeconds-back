@@ -30,9 +30,32 @@ class AudioController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $response = Response::make('OK', 200);
+        
+        if($request->hasFile('audio'))
+        {
+            if ($request->file('audio')->isValid()) {
+                
+                $audio=$this->fileSystemService->saveFile($request->file('audio'),$request->visibility);
+            }
+            else
+            {
+                $response = Response::make('FileNotFoundInRequest',400);
+            }
+        }
+        else
+        {
+            $response = Response::make('FileNotFoundInRequest',400);
+        }
+        if($audio)
+        {
+            $audio->save();
+        }
+
+        
+        return $response;
     }
 
     /**
