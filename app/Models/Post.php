@@ -12,6 +12,8 @@ use App\Models\TematicaPost;
 use App\Models\Visibilidad;
 class Post extends Model
 {
+    use HasFactory;
+
     protected $table= 'Post';
     protected $primaryKey='idPost';
     public $timestamps = false;

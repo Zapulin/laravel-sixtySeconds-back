@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Audio extends Model
 {
     use HasFactory;
-    
+
     protected $table= 'Audios';
     protected $primaryKey='idAudio';
     public $timestamps = false;
