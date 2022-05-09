@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Audio extends Model
+class Usuario extends Model
 {
     use HasFactory;
-
-    protected $table= 'Audios';
-    protected $primaryKey='idAudio';
     public $timestamps = false;
- 
+    protected $primaryKey = 'idUsuario';
+    protected $table= 'Usuarios';
 }

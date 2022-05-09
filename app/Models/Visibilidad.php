@@ -5,12 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Audio extends Model
+class Visibilidad extends Model
 {
     use HasFactory;
-
-    protected $table= 'Audios';
-    protected $primaryKey='idAudio';
+    protected $table= 'Visibilidad';
+    protected $primaryKey='idVisibilidad';
     public $timestamps = false;
- 
+
 }

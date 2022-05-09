@@ -32,7 +32,7 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => '/',//storage_path('app'),
+            'root' => storage_path('app'),
             'throw' => false,
             'cache' => [
                 'store' => 'memcached',
@@ -45,7 +45,7 @@ return [
             'host' => 'example.com',
             'username' => 'your-username',
             'password' => 'your-password',
- 
+            'root' => '/',
             // Settings for SSH key based authentication...
             // 'privateKey' => '/path/to/privateKey',
             // 'password' => 'encryption-password',

@@ -178,6 +178,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         \MigrationsGenerator\MigrationsGeneratorServiceProvider::class,
         App\Providers\FileSystemProvider::class,
+        App\Providers\CommentChainServiceProvider::class,
     ],
 
     /*
@@ -192,6 +193,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
+        'UrlHelper' => App\Http\Helpers\UrlHelper::class
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
