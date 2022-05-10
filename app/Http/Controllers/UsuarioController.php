@@ -15,23 +15,17 @@ class UsuarioController extends Controller
 {
     public function register(Request $request)
     {
-/* ==========================================================================================================
-        IF CANNOT MODIFY RESPONSE, USE THIS...
-        $content = ['message' => 'User created successfully.', 'token' => '1234'];
-        $status = 200;
-        $test = response()->json($content, $status);
-============================================================================================================= */
-        $response = new Response(['message' => 'Internal server error.'], 500);
+        $content = ['message' => 'Internal server error.'];
+        $status = 500;
         try {
             DB::beginTransaction();
-            if (!$this->isValid($request)) {
-                $response->original->status = 422;
-                throw new Exception('Invalid user data input.');
-            }
-            $user = new Usuario($request->all());
-            $user->password = bcrypt($request->password);
+//            if (!$this->isValid($request)) {
+//                $status = 422;
+//                throw new Exception('Invalid user data input.');
+//            }
+            $user = $this->fillModel(new Usuario(), $request);
 /* ==========================================================================================================
-            IF ELOQUENT DOESNT WORK USE THIS...
+            IF ELOQUENT DOESNT WORK USE THIS... $request->all()
             $newUser = new Usuario([
                 'name' => $request->get('name'),
                 'password' => bcrypt($request->get('password')),
@@ -39,76 +33,87 @@ class UsuarioController extends Controller
             ]);
 ============================================================================================================= */
             if ($user->save()) {
-                $response->original->token = $user->createToken('token')->plainTextToken;
-                $response->original->message = 'User created successfully.';
-                $response->original->status = 201;
+                $content += ['token' => $user->createToken('token')->plainTextToken];
+                $content->message = 'User created successfully.';
+                $status = 201;
             } else {
-                $response->original->status = 503;
+                $status = 503;
                 throw new Exception('External service unavailable.');
             }
             DB::commit();
         } catch (Exception $error) {
             DB::rollBack();
-            $response->original->error = $error->getMessage();
+            $content += ['error' => $error->getMessage()];
         } finally {
-            return Response::json($response);
+            return response()->json($content, $status);
         }
     }
 
     public function login(Request $request)
     {
-        $response = new Response(['message' => 'Internal server error.'], 500);
+        $content = ['message' => 'Internal server error.'];
+        $status = 500;
         try {
             if (!$this->isValid($request)) {
-                $response->original->status = 422;
+                $status = 422;
                 throw new Exception('Invalid user data input.');
             }
             $user = Usuario::where('email', $request->email)->first();
             if ($user && Hash::check($request->password, $user->password)) {
-                $response->original->token = $user->createToken()->plainTextToken;
-                $response->withHeaders(['location' => '/']);
-                $response->original->message = 'User authenticated successfully.';
-                $response->original->status = 302;
+                $content += ['token' => $user->createToken('token')->plainTextToken];
+                $content += ['location' => '/'];
+                $content->message = 'User authenticated successfully.';
+                $status = 302;
             } else {
-                $response->original->message = 'Invalid credentials.';
-                $response->original->status = 400;
+                $content->message = 'Invalid credentials.';
+                $status = 400;
             }
         } catch (Exception $error) {
-            $response->original->error = $error->getMessage();
+            $content += ['error' => $error->getMessage()];
         } finally {
-            return Response::json($response);
+            return response()->json($content, $status);
         }
     }
 
     public function logout(Request $request)
     {
-        $response = new Response(['message' => 'Internal server error.'], 500);
+        $content = ['message' => 'Internal server error.'];
+        $status = 500;
         try {
             $user = Usuario::find($request->id);
             if ($user) {
                 $user->tokens()->delete();
-                $response->original->message = 'User logged out correctly.';
-                $response->original->status = 404;
+                $content->message = 'User logged out correctly.';
+                $status = 404;
             } else {
-                $response->original->message = 'User not found.';
-                $response->original->status = 404;
+                $content->message = 'User not found.';
+                $status = 404;
             }
         } catch (Exception $error) {
-            $response->original->error = $error->getMessage();
+            $content += ['error' => $error->getMessage()];
         } finally {
-            return Response::json($response);
+            return response()->json($content, $status);
         }
+    }
+
+    private function fillModel(Usuario $user, Request $request): Usuario
+    {
+        $user->Nombre = $request->name;
+        $user->Nick = $request->username;
+        $user->Email = $request->email;
+        $user->Password = bcrypt($request->password);
+        $user->FechaNacimiento = Carbon::parse($request->birthdate);
+        return $user;
     }
 
     private function isValid(Request $request): bool
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|regex:/^[A-Z][a-z]{1,9}\s[A-Z][a-z]{1,9}$/',
-            'birth' => 'required|date_format:Y-m-d|before:'.Carbon::now()->subYears(12)->format('Y-m-d'),
+            'birthdate' => 'required|date_format:Y-m-d|before:'.Carbon::now()->subYears(12)->format('Y-m-d'),
             'username' => 'required|regex:/^[a-zA-Z]\w{4,11}$/|unique:App/Models/Usuario,Nick',
             'email' => 'required|email|unique:App/Models/Usuario,Email',
-            'password' => 'required|regex:/^[A-Z]+[a-z A-Z]*$/', // can also use 'confirmed' if repeat_password is named password_confirmation
-            'repeat_password' => 'required|same:password' // delete if 'confirmed' is being used above
+            'password' => 'required|regex:/^[A-Z]+[a-zA-Z]*$/|confirmed'
         ]);
         return !$validator->stopOnFirstFailure()->fails();
     }
