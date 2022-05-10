@@ -5,16 +5,16 @@ use App\Services\CommentChainService;
 use stdClass;
 use App\Helpers\UrlHelper;
 use Illuminate\Support\Facades\Log;
-class GetPostResponse 
+class GetPostResponse
 {
     protected CommentChainService $commentChainService;
     public function __construct(CommentChainService $_commentChainService)
     {
-        $this->commentChainService = $_commentChainService;                       
+        $this->commentChainService = $_commentChainService;
     }
     public function getResponseFromMultiplePost($posts)
     {
-        
+
         $response = [];
         if($posts instanceof \Illuminate\Database\Eloquent\Model)
         {
@@ -29,8 +29,8 @@ class GetPostResponse
                 }
             }
         }
-    
-    
+
+
     return $response;
 }
 public function getResponseFromPost($post)
@@ -58,7 +58,7 @@ public function getResponseFromPost($post)
         $response->audioURL = UrlHelper::getAudioFullUrl($post->Audio->ShortUrl);
     //Log::channel('stderr')->info('Post:'.$post->idPost);
     //Log::channel('stderr')->info('Tematica:'.$post->Tematica);
-    Log::channel('stderr')->info('Post:'.$post->Tematica()->first());
+    //Log::channel('stderr')->info('Post:'.$post->Tematica()->first());
     if($post->Tematica()->exists())
     {
         $response->category[] = $post->Tematica()->pluck('Nombre');
@@ -68,10 +68,10 @@ public function getResponseFromPost($post)
     $response->creationDate = $post->FechaCreacion;
     $response->likes = $post->Likes;
     $response->dislikes = $post->Dislikes;
-    Log::channel('stderr')->info('Comentarios:'.json_encode($post->Comentarios));
+    //Log::channel('stderr')->info('Comentarios:'.json_encode($post->Comentarios));
     if(isset($post->Comentarios))
         $response->comments =$this->commentChainService->parseCommentsToResponse($post->Comentarios);
     return $response;
 }
-   
+
 }

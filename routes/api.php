@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UsuarioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-             
 Route::get('/audio/{shortUrl}', 'App\Http\Controllers\AudioController@getAudio');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -22,8 +22,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/posts', 'App\Http\Controllers\PostController@Index');
-Route::get('/post/{id}','App\Http\Controllers\PostController@show');
-Route::post('/post/create','App\Http\Controllers\PostController@store');
-Route::post('/post/update','App\Http\Controllers\PostController@update');
-Route::delete('/post/{id}','App\Http\Controllers\PostController@destroy');
+Route::get('/post/{id}','App\Http\Controllers\PostController@show');//->middleware('auth:sanctum');
+Route::post('/post/create','App\Http\Controllers\PostController@store');//->middleware('auth:sanctum');
+Route::post('/post/update','App\Http\Controllers\PostController@update');//->middleware('auth:sanctum');
+Route::delete('/post/{id}','App\Http\Controllers\PostController@destroy');//->middleware('auth:sanctum');
 
+Route::post('/auth/register', [UsuarioController::class, 'register']);
+Route::post('/auth/login', [UsuarioController::class, 'login']);
+Route::post('/auth/logout'. [UsuarioController::class, 'logout']);

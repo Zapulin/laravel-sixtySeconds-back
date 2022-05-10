@@ -13,6 +13,7 @@ use App\Services\FileSystem;
 use Response;
 use DB;
 use Illuminate\Support\Facades\Log;
+
 class PostController extends Controller
 {
     protected CommentChainService $commentChainService;
@@ -55,9 +56,9 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
-        Log::channel('stderr')->info("Inserción de datos");
-        Log::channel('stderr')->info($request);
-       
+        //Log::channel('stderr')->info("Inserción de datos");
+        //Log::channel('stderr')->info($request);
+
         $response = [];
         try{
             DB::beginTransaction();
@@ -65,7 +66,7 @@ class PostController extends Controller
             //$post->idPost = $request->id;
             $post->idUsuario = $request->userId;
             $visibilidad = Visibilidad::where('Visibilidad', $request->visibility )->first();
-            Log::channel('stderr')->info('Visibilidad'.$visibilidad);
+            //Log::channel('stderr')->info('Visibilidad'.$visibilidad);
             if(!isset($visibilidad) || empty($visibilidad))
             {
                 $visibilidad = Visibilidad::where('Visibilidad','Public')->first();
@@ -73,26 +74,26 @@ class PostController extends Controller
             $audio = $this->fileSystem->saveFile($request->file('file'),$visibilidad->idVisibilidad);
             $post->idAudio = $audio->idAudio;
             $post->Titulo = $request->title;
-            
+
             $post->idVisibilidad = $visibilidad->idVisibilidad;
             $post->FechaCreacion = $request->creationDate;
             $post->Likes = 0;
             $post->Dislikes = 0;
-            
+
             if($post->save())
             {
                 if(isset($request->category) && !empty($request->category))
                 {
                     $tematicas = explode(',',$request->category);
-                    Log::channel('stderr')->info('Guardado Correcto');
+                    //Log::channel('stderr')->info('Guardado Correcto');
                     foreach($tematicas as $tematica)
                     {
                         $tematica = Tematica::where('Nombre', $tematica)->first();
-                    
+
                         if(isset($tematica))
                             $post->Tematica()->attach($tematica->idTematica);
                         //$user->roles()->attach($roleId, ['expires' => $expires]);
-                    } 
+                    }
                 }
                 $response = [ 'id' => $post->idPost];
 
@@ -101,8 +102,8 @@ class PostController extends Controller
             {
                 throw new Exception ('Error al almacenar el post');
             }
-            
-            
+
+
             DB::commit();
        }
         catch(Exception $e){
@@ -112,7 +113,7 @@ class PostController extends Controller
 
         }
         return Response::json($response, 201); // Status code here
-       
+
     }
 
     /**
@@ -137,7 +138,7 @@ class PostController extends Controller
         return Response::json($response, $returnCode); // Status code here
 
     }
- 
+
 
 
     /**
@@ -151,45 +152,45 @@ class PostController extends Controller
     {
         $response = [];
         try{
-            
+
             DB::beginTransaction();
             $post = Post::where('idPost',$request->id)->first();
             //$post->idPost = $request->id;
-           
+
             $visibilidad = Visibilidad::where('Visibilidad', $request->visibility )->first();
-            Log::channel('stderr')->info('Visibilidad'.$visibilidad);
+            //Log::channel('stderr')->info('Visibilidad'.$visibilidad);
             if(!isset($visibilidad) || empty($visibilidad))
             {
                 $visibilidad = $post->Visibilidad;
             }
-            // Se podrá cambiar el audio? 
+            // Se podrá cambiar el audio?
             //$audio = $this->fileSystem->saveFile($request->file('file'),$visibilidad->idVisibilidad);
             //$post->idAudio = $audio->idAudio;
             if(isset($request->title))
                 $post->Titulo = $request->title;
-            
+
             $post->idVisibilidad = $visibilidad->idVisibilidad;
             //$post->FechaCreacion = $request->creationDate;
             //$post->Likes = 0;
             //$post->Dislikes = 0;
-            
+
             if($post->save())
             {
                 if(isset($request->category))
                 {
                     $tematicasNewNombre = explode(',',$request->category);
-                    
+
                     $tematicasOld = [];
                     $tematicasNew =  Tematica::whereIn('Nombre',$tematicasNewNombre)->pluck('idTematica')->toArray();
                     $tematicasOld = $post->Tematica()->get()->pluck('idTematica')->toArray();
-                    
+
                     $tematicasAEliminar = array_diff($tematicasOld,$tematicasNew);
                     $tematicasAInsertar = array_diff($tematicasNew,$tematicasOld);
 
                     $post->Tematica()->detach($tematicasAEliminar);
                     $post->Tematica()->attach($tematicasAInsertar);
-         
-         
+
+
                 }
                 $response = [ 'id' => $post->idPost];
 
@@ -198,8 +199,8 @@ class PostController extends Controller
             {
                 throw new Exception ('Error al almacenar el post');
             }
-            
-            
+
+
             DB::commit();
        }
         catch(Exception $e){
@@ -220,23 +221,23 @@ class PostController extends Controller
     {
         $response = [];
         try{
-            
+
             DB::beginTransaction();
             $post = Post::where('idPost',$idPost)->first();
             if($post->exists())
             {
                 if($post->Tematica()->exists())
                     $post->Tematica()->detach($post->Tematica()->get()->pluck('idTematica')->toArray());
-               
+
                 if( $post->Comentarios != null)
                 {
-                    
+
                     $comentarios = $post->Comentarios()
                                         ->whereNotNull('idComentarioPadre')
                                         ->orderBy('idComentarioPadre', 'desc')
                                         ->get();
                                  // ->get();
-                    Log::channel('stderr')->info('Comentarios'.json_encode($comentarios));
+                    //Log::channel('stderr')->info('Comentarios'.json_encode($comentarios));
                     foreach($comentarios as $comentario)
                     {
                         $comentario->delete();
@@ -255,7 +256,6 @@ class PostController extends Controller
         }
         catch(Exception $e){
             DB::rollback();
-            $e->item = $request;
             return  Response::json($e, 500); // Status code here
         }
         return Response::json($response, 200); // Status code here
@@ -268,5 +268,5 @@ class PostController extends Controller
     {
 
     }
-    
+
 }
