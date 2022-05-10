@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -34,7 +33,7 @@ class UsuarioController extends Controller
 ============================================================================================================= */
             if ($user->save()) {
                 $content += ['token' => $user->createToken('token')->plainTextToken];
-                $content->message = 'User created successfully.';
+                $content['message'] = 'User created successfully.';
                 $status = 201;
             } else {
                 $status = 503;
@@ -62,10 +61,10 @@ class UsuarioController extends Controller
             if ($user && Hash::check($request->password, $user->password)) {
                 $content += ['token' => $user->createToken('token')->plainTextToken];
                 $content += ['location' => '/'];
-                $content->message = 'User authenticated successfully.';
+                $content['message'] = 'User authenticated successfully.';
                 $status = 302;
             } else {
-                $content->message = 'Invalid credentials.';
+                $content['message'] = 'Invalid credentials.';
                 $status = 400;
             }
         } catch (Exception $error) {
@@ -83,10 +82,10 @@ class UsuarioController extends Controller
             $user = Usuario::find($request->id);
             if ($user) {
                 $user->tokens()->delete();
-                $content->message = 'User logged out correctly.';
+                $content['message'] = 'User logged out correctly.';
                 $status = 404;
             } else {
-                $content->message = 'User not found.';
+                $content['message'] = 'User not found.';
                 $status = 404;
             }
         } catch (Exception $error) {
