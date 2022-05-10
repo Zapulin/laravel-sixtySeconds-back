@@ -22,9 +22,6 @@ class UsuarioController extends Controller
         $test = response()->json($content, $status);
 ============================================================================================================= */
         $response = new Response(['message' => 'Internal server error.'], 500);
-        $token = $request->user()->createToken($request->token_name);
-//        return ['token' => $token->plainTextToken];
-//        $request->user()->currentAccessToken()->delete(); LOG OUT
         try {
             DB::beginTransaction();
             if (!$this->isValid($request)) {

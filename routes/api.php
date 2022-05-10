@@ -29,4 +29,4 @@ Route::delete('/post/{id}','App\Http\Controllers\PostController@destroy');//->mi
 
 Route::post('/auth/register', [UsuarioController::class, 'register']);
 Route::post('/auth/login', [UsuarioController::class, 'login']);
-Route::post('/auth/logout'. [UsuarioController::class, 'logout']);
+Route::post('/auth/logout', [UsuarioController::class, 'logout']);
