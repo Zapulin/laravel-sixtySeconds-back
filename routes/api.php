@@ -21,12 +21,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/posts', 'App\Http\Controllers\PostController@Index');
-Route::get('/post/{id}','App\Http\Controllers\PostController@show');//->middleware('auth:sanctum');
-Route::post('/post/create','App\Http\Controllers\PostController@store');//->middleware('auth:sanctum');
-Route::post('/post/update','App\Http\Controllers\PostController@update');//->middleware('auth:sanctum');
-Route::delete('/post/{id}','App\Http\Controllers\PostController@destroy');//->middleware('auth:sanctum');
-
 Route::post('/auth/register', [UsuarioController::class, 'register']);
-Route::post('/auth/login', [UsuarioController::class, 'login']);
-Route::post('/auth/logout', [UsuarioController::class, 'logout']);
+Route::post('/auth/login', [UsuarioController::class, 'login'])->name('login');
+Route::get('/posts', 'App\Http\Controllers\PostController@Index');
+
+Route::group(['middleware' => 'auth:sanctum'], function() {
+    Route::get('/profile', [UsuarioController::class, 'myProfile']);
+    Route::get('/profile/{id}', [UsuarioController::class, 'profile']);
+    Route::post('/profile/edit', [UsuarioController::class, 'editProfile']);
+    Route::delete('/profile', [UsuarioController::class, 'destroyProfile']);
+    Route::get('/post/{id}', 'App\Http\Controllers\PostController@show');
+    Route::post('/post/create', 'App\Http\Controllers\PostController@store');
+    Route::post('/post/update', 'App\Http\Controllers\PostController@update');
+    Route::delete('/post/{id}', 'App\Http\Controllers\PostController@destroy');
+    Route::get('/auth/logout', [UsuarioController::class, 'logout']);
+});
