@@ -35,8 +35,8 @@
 	<main>
 	    
 	    <fielset>
-		
-		<legend>Crud del post</legend>
+
+		<legend>Post CRUD</legend>
 		<fielset>
 		    <legend>Get All Post</legend>
 		    <label> Url: https://sixtyseconds-backend.herokuapp.com/api/posts</label>
@@ -56,7 +56,7 @@
 		    <label>Method: POST</label>
 		    <label>Content-Type: multipart/form-data</label>
 		    <label>Body Params:
-			{ userId : "4",
+			{ 
 			visibility : "Public",
 			file: {Audio File},
 			title: "Example Post Create",
@@ -65,15 +65,37 @@
 			}
 			
 		    </label>
+		    <label>Requires: Autorization bearer token</label>
 		    <label>Returns: {"id": 165}</label>
 		    
 		</fielset>
+		<fielset>
+		    <legend>Update One Post</legend>
+		    <label> Url: https://sixtyseconds-backend.herokuapp.com/api/post/create</label>
+		    <label>Method: POST</label>
+		    <label>Content-Type: multipart/form-data</label>
+		    <label>Body Params:
+			{ 
+			visibility : "Public",
+			title: "Example Post Create",
+			category: "Humor,Deportes,Noticias"
+			}
+			
+		    </label>
+		    <label>Needs Autorization bearer token</label>
+		    <label>Returns: {"id": 165}</label>
+		    
+		</fielset>
+		
 		
 		<fielset>
 		    <legend>Delete one Post</legend>
 		    <label> Url: https://sixtyseconds-backend.herokuapp.com/api/post/{idPost}</label>
 		    <label>Method: DELETE</label>
+
 		    <label>Params: idPost(query)</label>
+		    <label>Needs Autorization bearer token</label>
+		    <label>Returns: Ok Message if deletes</label>
 		    
 		</fielset>
 	    </fielset>
