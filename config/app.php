@@ -176,7 +176,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        \MigrationsGenerator\MigrationsGeneratorServiceProvider::class,
+        //\MigrationsGenerator\MigrationsGeneratorServiceProvider::class,
         App\Providers\FileSystemProvider::class,
         App\Providers\CommentChainServiceProvider::class,
     ],

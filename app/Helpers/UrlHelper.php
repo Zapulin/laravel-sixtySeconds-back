@@ -8,5 +8,9 @@ class UrlHelper
         return env('APP_URL').'/api/audio/'.$shortUrl;
         
     }
+    public static function getImageUrl($url)
+    {
+         return env('APP_URL').'/api/image/'.$url;
+    }
 
 }

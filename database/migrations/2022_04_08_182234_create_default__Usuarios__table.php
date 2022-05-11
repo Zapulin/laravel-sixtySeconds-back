@@ -16,7 +16,9 @@ class CreateDefaultUsuariosTable extends Migration
         Schema::create('default.Usuarios', function (Blueprint $table) {
             $table->increments('idUsuario')->first();
             $table->text('Nombre')->nullable();
+            $table->text('Nick')->nullable();
             $table->date('FechaNacimiento')->nullable();
+            $table->text('Nick')->nullable();
             $table->text('Email')->nullable();
             $table->integer('idAudioPresentacion')->nullable()->index('fki_idAudioPresentacion_Audios');
             $table->text('Password')->nullable();
