@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Services\FileSystem;
+use DB;
+use Illuminate\Http\UploadedFile;
+
 
 
 class FyleSistemServiceTest extends TestCase
@@ -27,6 +30,7 @@ class FyleSistemServiceTest extends TestCase
    
     public function test_getShortUrl()
     {
+        DB::beginTransaction();
         $fileSystem = new FileSystem();
         $audios = Audio::factory()->count(100)->create();
         for($i=0; $i<100; $i++)
@@ -37,6 +41,7 @@ class FyleSistemServiceTest extends TestCase
             $audionew = Audio::factory()->create(['ShortUrl' => $shortUrl]);
             $audios->add($audionew);
         }
+        DB::rollback();
    
     }
     public function test_encryptFile()
@@ -75,17 +80,26 @@ class FyleSistemServiceTest extends TestCase
     }
     public function test_saveFile_getFile()
     {
-        if(Storage::disk('local')->exists('/test/decriptedAudio.mp3'))
+        if(Storage::disk('s3')->exists('/test/decriptedAudio.mp3'))
         {
-            Storage::disk('local')->delete('/test/decriptedAudio.mp3'); 
+            Storage::disk('s3')->delete('/test/decriptedAudio.mp3'); 
         }
         $fileSystem = new FileSystem();
+    
+        
         $file =  Storage::disk('local')->get('/test/testAudio.mp3');
+        
+     
+        $filename =  Storage::disk('local')->path('/test/testAudio.mp3');
+        $file = new UploadedFile($filename, 'invoice.pdf', 'application/mpeg', 1, true);
+
         $audio = $fileSystem->saveFile($file,1);
           
         $savedfile =$fileSystem->getFile($audio);
+
+       
         $this->assertTrue($savedfile != null);
-        $this->assertTrue(Storage::disk('local')->put('/test/decriptedAudio.mp3', $savedfile));
+        $this->assertTrue(Storage::disk('local')->put('/test/decriptedAudioAmazon.mp3', $savedfile));
           
     }
    

@@ -19,7 +19,7 @@ class UsuarioController extends Controller
             $underAge = 12;
             $request->validate([
                 'name' => 'required|regex:/^[A-Z][a-z]{1,9}\s[A-Z][a-z]{1,9}$/',
-                'birthdate' => 'required|date_format:d-m-Y|before:'.Carbon::now()->subYears($underAge)->format('d-m-Y'),
+                'birthdate' => 'required|date_format:d-m-Y|before:'.Carbon::now()->subYears($underAge)->format('Y-m-d'),
                 'username' => 'required|regex:/^[a-zA-Z]\w{4,11}$/|unique:App\Models\Usuario,Nick',
                 'email' => 'required|email|unique:App\Models\Usuario,Email',
                 'password' => 'required|regex:/^[a-zA-Z0-9]\w{4,9}$/|confirmed'

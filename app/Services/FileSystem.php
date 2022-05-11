@@ -7,6 +7,7 @@ use Illuminate\Encryption\Encrypter;
 use Datetime;
 use Config;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 class FileSystem
 {
 
@@ -15,14 +16,17 @@ class FileSystem
         $file = null;
         if($audio->server == null || $audio->server == 'local')
         {
-            if(!Storage::disk('local')->exists($audio->Url))
+            if(!Storage::disk('s3')->exists($audio->Url))
             {
                 die('El archivo no existe');
             }
             else
             {
-                $file = Storage::disk('local')->get($audio->Url);
+                
+                $file = Storage::disk('s3')->get($audio->Url);
+            
                 $decryptedFile = $this->decryptFile($file,$audio->ClaveDesbloqueo);
+             
             }
                 
         }else if($audio->server == 'sftp'){
@@ -31,24 +35,33 @@ class FileSystem
         return $decryptedFile;
     }
     //Saves the file into the server and returns audio file or false
-    public function saveFile($file, $idVisibilidad)
+    public function saveFile($fileRaw, $idVisibilidad)
     {
+        $path = $fileRaw->store('tmpAudios','local');
+
+        $file =  Storage::disk('local')->get($path);
+  
         $audio = $this->createAudioFromFile($file);
         $audio->idVisibilidad = $idVisibilidad;
 
         //TODO Encriptar!
         $encryptedFile = $this->encryptFile($file,$audio->ClaveDesbloqueo);
-        if (! Storage::disk('local')->put($audio->Url, $encryptedFile)) {
+          Log::channel('stderr')->info($audio->Url);
+        if (! Storage::disk('s3')->put($audio->Url, $encryptedFile)) {
             // The file could not be written to disk...
+            Storage::disk('local')->delete($path);
             return false;
         }
+        
         $audio->save();
+        Storage::disk('local')->delete($path);
         return $audio;
         
 
     }
     public function createAudioFromFile($file)
     {
+   
         //https://stackoverflow.com/questions/40033879/handling-file-upload-in-laravels-controller
         $audio = new Audio();
         //Get file size, created date

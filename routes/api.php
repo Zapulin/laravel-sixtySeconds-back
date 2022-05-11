@@ -16,10 +16,10 @@ use App\Http\Controllers\UsuarioController;
 */
 
 Route::get('/audio/{shortUrl}', 'App\Http\Controllers\AudioController@getAudio');
-
+/*
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
-});
+    });*/
 
 Route::post('/auth/register', [UsuarioController::class, 'register']);
 Route::post('/auth/login', [UsuarioController::class, 'login'])->name('login');

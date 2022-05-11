@@ -13,9 +13,11 @@ use App\Services\FileSystem;
 use Response;
 use DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
+  
     protected CommentChainService $commentChainService;
     protected FileSystem $fileSystem;
     public function __construct(CommentChainService $_commentChainService, FileSystem $_fileSystem)
@@ -64,13 +66,14 @@ class PostController extends Controller
             DB::beginTransaction();
             $post = new Post();
             //$post->idPost = $request->id;
-            $post->idUsuario = $request->userId;
+            $post->idUsuario = $request->user()->idUsuario;
             $visibilidad = Visibilidad::where('Visibilidad', $request->visibility )->first();
-            //Log::channel('stderr')->info('Visibilidad'.$visibilidad);
+
             if(!isset($visibilidad) || empty($visibilidad))
             {
                 $visibilidad = Visibilidad::where('Visibilidad','Public')->first();
             }
+       
             $audio = $this->fileSystem->saveFile($request->file('file'),$visibilidad->idVisibilidad);
             $post->idAudio = $audio->idAudio;
             $post->Titulo = $request->title;
@@ -108,7 +111,7 @@ class PostController extends Controller
        }
         catch(Exception $e){
             DB::rollback();
-            $e->item = $request;
+            
             return  Response::json($e, 500); // Status code here
 
         }
@@ -154,14 +157,22 @@ class PostController extends Controller
         try{
 
             DB::beginTransaction();
-            $post = Post::where('idPost',$request->id)->first();
+   
+            $post = Post::where('idPost',$request->post_id)->first();
             //$post->idPost = $request->id;
 
-            $visibilidad = Visibilidad::where('Visibilidad', $request->visibility )->first();
-            //Log::channel('stderr')->info('Visibilidad'.$visibilidad);
+                if($post->Usuario->idUsuario != $request->user()->idUsuario)
+                {
+                    DB::rollback();
+                    $response[] = ['message' => 'Error: No estas autorizado para editar este post.'];
+                    return  Response::json($response, 401); // Status code here
+                }
+            if($request->visibility)
+                $visibilidad = Visibilidad::where('Visibilidad', $request->visibility )->first();
+
             if(!isset($visibilidad) || empty($visibilidad))
             {
-                $visibilidad = $post->Visibilidad;
+                $visibilidad = $post->Visibilidad ;
             }
             // Se podrá cambiar el audio?
             //$audio = $this->fileSystem->saveFile($request->file('file'),$visibilidad->idVisibilidad);
@@ -205,7 +216,7 @@ class PostController extends Controller
        }
         catch(Exception $e){
             DB::rollback();
-            $e->item = $request;
+            
             return  Response::json($e, 500); // Status code here
         }
         return Response::json($response, 200); // Status code here
@@ -217,15 +228,22 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy($idPost)
+    public function destroy(Request $request ,$idPost)
     {
         $response = [];
         try{
 
             DB::beginTransaction();
             $post = Post::where('idPost',$idPost)->first();
-            if($post->exists())
+                             
+            if($post != null && $post->exists() )
             {
+                if($post->Usuario->idUsuario != $request->user()->idUsuario)
+                {
+                    DB::rollback();
+                    $response[] = ['message' => 'Error: No estas autorizado para eliminar este post.'];
+                    return  Response::json($response, 401); // Status code here
+                }
                 if($post->Tematica()->exists())
                     $post->Tematica()->detach($post->Tematica()->get()->pluck('idTematica')->toArray());
 
@@ -244,7 +262,10 @@ class PostController extends Controller
                     }
                     $post->Comentarios()->delete();
                 }
+              
                 $post->delete();
+                if($post->Audio()->exists())
+                    $post->Audio->delete();
                 $response[] = ['message' => 'Post eliminado correctamente'];
             }
             else{
@@ -262,11 +283,101 @@ class PostController extends Controller
     }
     public function addComment(Request $request)
     {
+        $response = [];
+        try{
+            
+            DB::beginTransaction();
+            $comentario = new Comentario();
+            $comentario->idUsuario = $request->user()->idUsuario;
+            $comentario->FechaCreacion = $request->creationDate;
+            $comentario->idPost = $request->postID;
+            $visibilidad = Visibilidad::where('Visibilidad', $request->visibility )->first();
+                    
+            if(!isset($visibilidad) || empty($visibilidad))
+            {
+                $visibilidad = $post->Visibilidad;
+            }
 
+            $audio = $this->fileSystem->saveFile($request->file('file'),$visibilidad->idVisibilidad);
+            $comentario->idAudio = $audio->idAudio;
+            DB::commit();
+            $comentario->Likes = 0;
+            $comentario->Dislikes = 0;
+            $comentario->idComentarioPadre = $request->parentId;
+
+            if($comentario->save())
+            {
+                
+                $response = [ 'id' => $comentario->idComentario];
+
+            }
+            else
+            {
+                throw new Exception ('Error al almacenar el post');
+            }
+            DB::commit();
+            
+        }
+        catch(Exception $e){
+            DB::rollback();
+            
+            return  Response::json($e, 500); // Status code here
+        }
+        return Response::json($response, 200); // Status code here
+       
     }
-    public function destroyComment(Request $request)
+    public function destroyComment(Request $request,$idComment)
     {
+         $response = [];
+        try{
+            
+            DB::beginTransaction();
+            $comentario = Comentario::where('idcomentario',$idComment)->first();
+            
+            if($comentario != null && $comentario->exists())
+            {
+                
+                 if($comentario->Usuario->idUsuario != $request->user()->idUsuario)
+                {
+                    DB::rollback();
+                    $response[] = ['message' => 'Error: No estas autorizado para eliminar este comentario.'];
+                    return  Response::json($response, 401); // Status code here
+                }
+                 
+                if( $comentario->Comentarios != null)
+                {
+                    this->deleteCommentChildren($comentario->Comentarios);
+                }
+                if($post->Audio()->exists())
+                    $post->Audio->delete();
+                $comentario->delete();
+                $response[] = ['message' => 'Post eliminado correctamente'];
+            }
+            else{
+                $response[] = ['message' => 'El post a eliminar no existe'];
 
+            }
+            DB::commit();
+
+        }
+        catch(Exception $e){
+            DB::rollback();
+            
+            return  Response::json($e, 500); // Status code here
+        }
+        return Response::json($response, 200); // Status code here
+    
+    }
+    protected function deleteCommentChildren($comentarios)
+    {
+        foreach($comentarios as $comentario)
+        {
+            if($comentario->Comentarios != null)
+            {
+                this->deleteCommentChildren($comentario->Comentarios());
+            }
+            $comentario->delete();
+        }
     }
 
 }

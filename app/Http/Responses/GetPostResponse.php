@@ -35,17 +35,7 @@ class GetPostResponse
 }
 public function getResponseFromPost($post)
 {
-    /* {
-       "idPost": 3,
-       "idVisibilidad": 1,
-       "Visualizaciones": 30,
-       "idUsuario": 4,
-       "idAudio": 887687,
-       "FechaCreacion": "1996-08-18 00:00:00+02",
-       "Dislikes": 323,
-       "Likes": 333
-       }
-    */
+
     $response = new stdClass();
     $response->id = $post->idPost;
     if(isset($post->Usuario))
@@ -61,7 +51,7 @@ public function getResponseFromPost($post)
     //Log::channel('stderr')->info('Post:'.$post->Tematica()->first());
     if($post->Tematica()->exists())
     {
-        $response->category[] = $post->Tematica()->pluck('Nombre');
+        $response->category = $post->Tematica()->take(1)->pluck('Nombre')->first();
         /*foreach( $post->Tematica() as  $tematica)
           $response->category[] = $tematica->Nombre;*/
     }
